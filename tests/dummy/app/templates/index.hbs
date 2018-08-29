@@ -1,0 +1,69 @@
+<div class="col-md-6">
+  <div class="form-group">
+    <label>Choose an artist</label>
+    {{#auto-complete
+          on-select=(action "selectArtist")
+          on-input=(action "filterArtists")
+          items=matchingArtists
+          displayProperty="name"
+          class="autocomplete-container" as |params|}}
+      <div class="input-group">
+        {{auto-complete-input
+            value=params.inputValue
+            on-change=params.onInput
+            type="text"
+            class="combobox input-large form-control"
+            placeholder="Select an artist"}}
+        {{#auto-complete-list
+            isVisible=params.isOpen
+            class="typeahead typeahead-long dropdown-menu"}}
+          {{#each params.options as |option|}}
+            {{#auto-complete-option
+                index=option.index
+                on-click=params.onSelect
+                isFocused=(eq params.focusedIndex option.index)
+                isSelected=(eq params.selectedIndex option.index)}}
+              <a href="#">{{option.value}}</a>
+            {{/auto-complete-option}}
+          {{else}}
+            <li><a href="#">No results.</a></li>
+          {{/each}}
+        {{/auto-complete-list}}
+        {{#auto-complete-dropdown-toggle on-click=params.toggleDropdown class="input-group-addon dropdown-toggle"}}
+          <span class="caret"></span>
+        {{/auto-complete-dropdown-toggle}}
+      </div>
+    {{/auto-complete}}
+  </div>
+</div>
+<div class="col-md-6">
+  <div class="panel-default">
+    <label>Chosen artist</label>
+    <div class="panel-body artist-card">
+      {{#if selectedArtist}}
+      <div class="artist-column">
+        <img height="150" width="150" src={{selectedArtist.img}} alt={{selectedArtist.name}} title={{selectedArtist.name}} border="0" />
+      </div>
+      <div class="artist-column">
+        <h4>{{selectedArtist.name}}</h4>
+        <div class="artist-props">
+          <p><strong>Age: </strong>{{selectedArtist.age}}</p>
+          <p>
+            <strong>Bands: </strong>
+            <ul class="artist-bands-list">
+              {{#each selectedArtist.bands as |band|}}
+              <li>{{band}}</li>
+              {{/each}}
+            </ul>
+          </p>
+          <p></p>
+        </div>
+      </div>
+      {{else}}
+      <div>
+        Start typing the name of an artist.
+      </div>
+      {{/if}}
+    </div>
+  </div>
+</div>

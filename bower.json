@@ -1,0 +1,13 @@
+{
+  "name": "ember-mapbox-autocomplete",
+  "dependencies": {
+    "ember": "1.13.7",
+    "ember-cli-shims": "0.1.0",
+    "ember-cli-test-loader": "0.2.2",
+    "ember-qunit-notifications": "0.1.0",
+    "roboto-fontface": "~0.4.3"
+  },
+  "devDependencies": {
+    "bootstrap": "~3.3.5"
+  }
+}
