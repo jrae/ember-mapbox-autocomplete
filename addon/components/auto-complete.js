@@ -6,7 +6,7 @@ export default Ember.Component.extend({
 
   mapboxAccessToken: '',
   layout: layout,
-  minSearchLength:  2,
+  // minSearchLength:  2,
   resultsLimit:     5,
   isDropdownOpen:   false,
   input:            null,
@@ -126,7 +126,7 @@ export default Ember.Component.extend({
   searchPlaces(query) {
     console.log(query);
     _this = this;
-    if(query.length > this.get('minSearchLength')){
+    // if(query.length > this.get('minSearchLength')){
       Ember.$.ajax({
         url: this._buildMapBoxUrl(query),
         type: 'GET',
@@ -136,7 +136,7 @@ export default Ember.Component.extend({
       }, function(error) {
           console.log('failed to search places via mapbox', error);
       });
-    }
+    // }
   },
 
   _parsePlaces(features) {
