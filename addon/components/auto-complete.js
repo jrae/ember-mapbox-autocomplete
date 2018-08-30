@@ -188,7 +188,6 @@ export default Ember.Component.extend({
           Ember.run.scheduleOnce('afterRender', this, function() {
             const firstItem = this.get('items.firstObject');
             if (firstItem) {
-              this.get('on-select')(firstItem);
               this.setSelectedIndex(0);
               const inputValue = this._inputValueForItem(firstItem);
               this.set('inputValue', inputValue);
