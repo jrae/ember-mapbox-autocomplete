@@ -1,12 +1,13 @@
 import Ember from 'ember';
+import ENV from '.././config/environment'
 import layout from '../templates/components/auto-complete';
 
 export default Ember.Component.extend({
   "on-select": null,
-  "on-input": null,
 
   layout: layout,
-
+  minSearchLength:  2,
+  resultsLimit:     5,
   isDropdownOpen:   false,
   input:            null,
   inputValue:       '',
@@ -129,6 +130,31 @@ export default Ember.Component.extend({
     return item.get(displayProperty);
   },
 
+  _buildMapBoxUrl(query) {
+    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${ENV.mapbox.access_token}&limit=${this.get('resultsLimit')}`
+  },
+
+  findPlaces(searchTerm) {
+    console.log(searchTerm);
+    url = this._buildMapBoxUrl(searchTerm);
+    if(searchTerm.length > this.get('minSearchLength')){
+      Ember.$.ajax({
+        url: url,
+        type: 'GET',
+        dataType: 'json'
+      }).then(function(data) {
+          this.set('items', this._parseItems(data));
+       }, function(error) {
+          console.log('failed to rate the pilot', error);
+       });
+    }
+  },
+
+  _parseItems(data){
+    debugger
+    console.log(data);
+  },
+
   actions: {
     selectItem(index) {
       this.setSelectedIndex(index);
@@ -139,7 +165,7 @@ export default Ember.Component.extend({
     },
 
     inputDidChange(value) {
-      this.get('on-input')(value);
+      this.findPlaces(value);
       this.resetFocusedIndex();
       this.resetSelectedIndex();
       this.openDropdown();
