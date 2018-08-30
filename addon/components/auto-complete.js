@@ -1,10 +1,10 @@
 import Ember from 'ember';
-import ENV from '.././config/environment'
 import layout from '../templates/components/auto-complete';
 
 export default Ember.Component.extend({
   "on-select": null,
 
+  mapboxAccessToken: '',
   layout: layout,
   minSearchLength:  2,
   resultsLimit:     5,
@@ -131,19 +131,18 @@ export default Ember.Component.extend({
   },
 
   _buildMapBoxUrl(query) {
-    `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${ENV.mapbox.access_token}&limit=${this.get('resultsLimit')}`
+    return `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${this.get('mapboxAccessToken')}&limit=${this.get('resultsLimit')}`
   },
 
   findPlaces(searchTerm) {
     console.log(searchTerm);
-    url = this._buildMapBoxUrl(searchTerm);
     if(searchTerm.length > this.get('minSearchLength')){
       Ember.$.ajax({
-        url: url,
+        url: this._buildMapBoxUrl(searchTerm),
         type: 'GET',
         dataType: 'json'
       }).then(function(data) {
-          this.set('items', this._parseItems(data));
+          this.set('items', this._parseItems(data.features));
        }, function(error) {
           console.log('failed to rate the pilot', error);
        });
@@ -151,8 +150,8 @@ export default Ember.Component.extend({
   },
 
   _parseItems(data){
-    debugger
     console.log(data);
+    return data;
   },
 
   actions: {
