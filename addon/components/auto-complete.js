@@ -168,7 +168,7 @@ export default Ember.Component.extend({
   actions: {
     selectItem(index) {
       this.setSelectedIndex(index);
-      let selectedItem = this.get('selectedItem');
+      let selectedItem = this.get('items')[index];
       this.get('on-select')(selectedItem);
       this.closeDropdown();
       this.set('inputValue', this._inputValueForItem(selectedItem));
