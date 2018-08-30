@@ -25,17 +25,6 @@ export default Ember.Component.extend({
     return this.parseOptions(this.get('items'));
   }),
 
-  parseOptions(items) {
-    let options = items.map((item, index) => {
-      return Ember.Object.create({
-        id: item.get('id'),
-        index: index,
-        value: item.get(this.get('displayProperty'))
-      });
-    });
-    return Ember.A(options);
-  },
-
   toggleDropdown() {
     this.toggleProperty('isDropdownOpen');
   },
@@ -143,10 +132,10 @@ export default Ember.Component.extend({
         type: 'GET',
         dataType: 'json'
       }).then(function(data) {
-          _this.set('options', _this._parsePlaces(data.features));
-       }, function(error) {
+        _this._parsePlaces(data.features);
+      }, function(error) {
           console.log('failed to search places via mapbox', error);
-       });
+      });
     }
   },
 
@@ -155,14 +144,25 @@ export default Ember.Component.extend({
       return Ember.Object.create({
         id: item.id,
         index: index,
-        place_name: item.properties.place_name,
-        text: item.properties.text,
+        place_name: item.place_name,
+        text: item.text,
         long: item.center[0],
         lat: item.center[0],
       });
     });
     this.set('items', items);
-    this.parseOptions(items);
+    this.set('options', this.parseOptions(items));
+  },
+
+  parseOptions(items) {
+    let options = items.map((item, index) => {
+      return Ember.Object.create({
+        id: item.get('id'),
+        index: index,
+        value: item.get(this.get('displayProperty'))
+      });
+    });
+    return Ember.A(options);
   },
 
   actions: {
