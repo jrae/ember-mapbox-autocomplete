@@ -146,8 +146,8 @@ export default Ember.Component.extend({
         index: index,
         place_name: item.place_name,
         text: item.text,
-        long: item.center[0],
         lat: item.center[0],
+        long: item.center[1],
       });
     });
     this.set('items', items);
