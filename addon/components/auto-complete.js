@@ -13,12 +13,28 @@ export default Ember.Component.extend({
   inputValue:       '',
   focusedIndex:     null,
   selectedIndex:    null,
-  items:            [],
-  displayProperty:  '',
-
-  itemsLength: Ember.computed.readOnly('items.length'),
-
+  displayProperty:  'place_name',
   isBackspacing: false,
+
+  items:            [],
+  selectedItem: Ember.computed('selectedIndex', 'items.[]', function() {
+    return this.get('items').objectAt(this.get('selectedIndex'));
+  }),
+
+  options: Ember.computed('items.[]', function() {
+    return this.parseOptions(this.get('items'));
+  }),
+
+  parseOptions(items) {
+    let options = items.map((item, index) => {
+      return Ember.Object.create({
+        id: item.get('id'),
+        index: index,
+        value: item.get(this.get('displayProperty'))
+      });
+    });
+    return Ember.A(options);
+  },
 
   toggleDropdown() {
     this.toggleProperty('isDropdownOpen');
@@ -65,9 +81,9 @@ export default Ember.Component.extend({
     const currentIndex = this.get('focusedIndex');
     let newIndex;
     if (Ember.isNone(currentIndex)) {
-      newIndex = this.get('itemsLength') - 1;
+      newIndex = this.get('resultsLimit') - 1;
     } else if (currentIndex === 0) {
-      newIndex = this.get('itemsLength') - 1;
+      newIndex = this.get('resultsLimit') - 1;
     } else {
       newIndex = currentIndex - 1;
     }
@@ -78,7 +94,7 @@ export default Ember.Component.extend({
   focusNext: function(event) {
     event.preventDefault();
     const currentIndex = this.get('focusedIndex');
-    const lastIndex = this.get('itemsLength') - 1;
+    const lastIndex = this.get('resultsLimit') - 1;
     let newIndex;
     if (Ember.isNone(currentIndex)) {
       newIndex = 0;
@@ -91,18 +107,6 @@ export default Ember.Component.extend({
     this.openDropdown();
   },
 
-  options: Ember.computed('items.[]', function() {
-    const displayProperty = this.get('displayProperty');
-    let options = this.get('items').map((item, index) => {
-      return Ember.Object.create({
-        id: item.get('id'),
-        index: index,
-        value: item.get(displayProperty)
-      });
-    });
-    return Ember.A(options);
-  }),
-
   selectItem: function(event) {
     event.preventDefault();
     const focusedIndex = this.get('focusedIndex');
@@ -111,10 +115,6 @@ export default Ember.Component.extend({
     }
     this.closeDropdown();
   },
-
-  selectedItem: Ember.computed('selectedIndex', 'items.[]', function() {
-    return this.get('items').objectAt(this.get('selectedIndex'));
-  }),
 
   handleKeydown: Ember.on('keyDown', function(event) {
     const map = this.get('keydownMap');
@@ -134,24 +134,35 @@ export default Ember.Component.extend({
     return `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${this.get('mapboxAccessToken')}&limit=${this.get('resultsLimit')}`
   },
 
-  findPlaces(searchTerm) {
-    console.log(searchTerm);
-    if(searchTerm.length > this.get('minSearchLength')){
+  searchPlaces(query) {
+    console.log(query);
+    _this = this;
+    if(query.length > this.get('minSearchLength')){
       Ember.$.ajax({
-        url: this._buildMapBoxUrl(searchTerm),
+        url: this._buildMapBoxUrl(query),
         type: 'GET',
         dataType: 'json'
       }).then(function(data) {
-          this.set('items', this._parseItems(data.features));
+          _this.set('options', _this._parsePlaces(data.features));
        }, function(error) {
-          console.log('failed to rate the pilot', error);
+          console.log('failed to search places via mapbox', error);
        });
     }
   },
 
-  _parseItems(data){
-    console.log(data);
-    return data;
+  _parsePlaces(features) {
+    let items = features.map((item, index) => {
+      return Ember.Object.create({
+        id: item.id,
+        index: index,
+        place_name: item.properties.place_name,
+        text: item.properties.text,
+        long: item.center[0],
+        lat: item.center[0],
+      });
+    });
+    this.set('items', items);
+    this.parseOptions(items);
   },
 
   actions: {
@@ -164,7 +175,7 @@ export default Ember.Component.extend({
     },
 
     inputDidChange(value) {
-      this.findPlaces(value);
+      this.searchPlaces(value);
       this.resetFocusedIndex();
       this.resetSelectedIndex();
       this.openDropdown();
