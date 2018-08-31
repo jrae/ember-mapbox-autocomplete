@@ -2,11 +2,19 @@ import Ember from 'ember';
 import layout from '../templates/components/auto-complete';
 
 export default Ember.Component.extend({
+
+  /**
+   * Set default values in component init
+   */
+  init() {
+    this._super(...arguments);
+  },
+
   "on-select": null,
 
   mapboxAccessToken: '',
   layout: layout,
-  // minSearchLength:  2,
+  minSearchLength:  2,
   resultsLimit:     5,
   isDropdownOpen:   false,
   input:            null,
@@ -15,14 +23,32 @@ export default Ember.Component.extend({
   selectedIndex:    null,
   displayProperty:  'place_name',
   isBackspacing: false,
+  isSearching: false,
 
-  items:            [],
+  items: [],
   selectedItem: Ember.computed('selectedIndex', 'items.[]', function() {
     return this.get('items').objectAt(this.get('selectedIndex'));
   }),
 
   options: Ember.computed('items.[]', function() {
     return this.parseOptions(this.get('items'));
+  }),
+
+  keydownMap: {
+    8:  'startBackspacing', // backspace
+    13: 'selectItem',  // return
+    27: 'closeDropdown', // escape
+    38: 'focusPrevious', // up key
+    40: 'focusNext', // down key
+  },
+
+  handleKeydown: Ember.on('keyDown', function(event) {
+    const map = this.get('keydownMap');
+    const code = event.keyCode;
+    const method = map[code];
+    if (method) {
+      return this[method](event);
+    }
   }),
 
   toggleDropdown() {
@@ -37,12 +63,8 @@ export default Ember.Component.extend({
     this.set('isDropdownOpen', false);
   },
 
-  keydownMap: {
-    8:  'startBackspacing', // backspace
-    13: 'selectItem',  // return
-    27: 'closeDropdown', // escape
-    38: 'focusPrevious', // up key
-    40: 'focusNext', // down key
+  startSearching: function() {
+    this.set('isSearching', true);
   },
 
   startBackspacing: function() {
@@ -105,15 +127,6 @@ export default Ember.Component.extend({
     this.closeDropdown();
   },
 
-  handleKeydown: Ember.on('keyDown', function(event) {
-    const map = this.get('keydownMap');
-    const code = event.keyCode;
-    const method = map[code];
-    if (method) {
-      return this[method](event);
-    }
-  }),
-
   _inputValueForItem(item) {
     let displayProperty = this.get('displayProperty');
     return item.get(displayProperty);
@@ -125,18 +138,16 @@ export default Ember.Component.extend({
 
   searchPlaces(query) {
     console.log(query);
-    _this = this;
-    // if(query.length > this.get('minSearchLength')){
-      Ember.$.ajax({
-        url: this._buildMapBoxUrl(query),
-        type: 'GET',
-        dataType: 'json'
-      }).then(function(data) {
-        _this._parsePlaces(data.features);
-      }, function(error) {
-          console.log('failed to search places via mapbox', error);
-      });
-    // }
+    let _this = this;
+    Ember.$.ajax({
+      url: this._buildMapBoxUrl(query),
+      type: 'GET',
+      dataType: 'json'
+    }).then(function(data) {
+      _this._parsePlaces(data.features);
+    }, function(error) {
+        console.log('failed to search places via mapbox', error);
+    });
   },
 
   _parsePlaces(features) {
@@ -175,29 +186,17 @@ export default Ember.Component.extend({
     },
 
     inputDidChange(value) {
-      this.searchPlaces(value);
-      this.resetFocusedIndex();
-      this.resetSelectedIndex();
-      this.openDropdown();
-      return new Ember.RSVP.Promise((resolve, reject) => {
-        if (this.get('isBackspacing')) {
-          this.set('inputValue', value);
-          this.set('isBackspacing', false);
-          reject();
-        } else {
-          Ember.run.scheduleOnce('afterRender', this, function() {
-            const firstItem = this.get('items.firstObject');
-            if (firstItem) {
-              this.setSelectedIndex(0);
-              // const inputValue = this._inputValueForItem(firstItem);
-              // this.set('inputValue', inputValue);
-              // Ember.run.next(this, () => {
-              //   resolve({ start: value.length, end: inputValue.length });
-              // });
-            }
-          });
-        }
-      });
+      this.set('inputValue', value);
+      if (this.get('isBackspacing')) {
+        this.set('isBackspacing', false);
+      } else if(value.length > this.get('minSearchLength')){
+        this.searchPlaces(value);
+        this.startSearching();
+        this.resetFocusedIndex();
+        this.resetSelectedIndex();
+        this.openDropdown();
+        this.setSelectedIndex(0);
+      }
     },
 
     toggleDropdown() {
