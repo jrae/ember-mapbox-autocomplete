@@ -189,8 +189,6 @@ export default Ember.Component.extend({
             const firstItem = this.get('items.firstObject');
             if (firstItem) {
               this.setSelectedIndex(0);
-              const inputValue = this._inputValueForItem(firstItem);
-              this.set('inputValue', inputValue);
               Ember.run.next(this, () => {
                 resolve({ start: value.length, end: inputValue.length });
               });
