@@ -137,7 +137,6 @@ export default Ember.Component.extend({
   },
 
   searchPlaces(query) {
-    console.log(query);
     let _this = this;
     Ember.$.ajax({
       url: this._buildMapBoxUrl(query),
