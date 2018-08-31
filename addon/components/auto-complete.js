@@ -23,7 +23,8 @@ export default Ember.Component.extend({
   selectedIndex:    null,
   displayProperty:  'place_name',
   isBackspacing: false,
-  isSearching: false,
+  searchTimeout: null,
+  typingSearchDelay: 200,
 
   items: [],
   selectedItem: Ember.computed('selectedIndex', 'items.[]', function() {
@@ -61,10 +62,6 @@ export default Ember.Component.extend({
 
   closeDropdown: function() {
     this.set('isDropdownOpen', false);
-  },
-
-  startSearching: function() {
-    this.set('isSearching', true);
   },
 
   startBackspacing: function() {
@@ -185,16 +182,20 @@ export default Ember.Component.extend({
     },
 
     inputDidChange(value) {
+      let _this = this
       this.set('inputValue', value);
       if (this.get('isBackspacing')) {
         this.set('isBackspacing', false);
       } else if(value.length > this.get('minSearchLength')){
-        this.searchPlaces(value);
-        this.startSearching();
-        this.resetFocusedIndex();
-        this.resetSelectedIndex();
-        this.openDropdown();
-        this.setSelectedIndex(0);
+        clearTimeout(this.get('searchTimeout'));
+        this.set('searchTimeout', setTimeout(function() {
+          _this.searchPlaces(value);
+          _this.resetFocusedIndex();
+          _this.resetSelectedIndex();
+          _this.openDropdown();
+          _this.setSelectedIndex(0);
+          }, _this.get('typingSearchDelay'))
+        );
       }
     },
 
