@@ -112,7 +112,6 @@ export default Ember.Component.extend({
     if (Ember.isPresent(focusedIndex)) {
       this.send('selectItem', focusedIndex);
     } else {
-      debugger
       this.get('on-select')(null);;
     }
     this.closeDropdown();
@@ -173,11 +172,11 @@ export default Ember.Component.extend({
         let selectedItem = this.get('items')[index];
         this.set('inputValue', this._inputValueForItem(selectedItem));
         this.get('on-select')(selectedItem);
-        this.closeDropdown();
       } else {
         // selecting enter with no value
         this.get('on-select')(null);
       }
+      this.closeDropdown();
     },
 
     inputDidChange(value) {
