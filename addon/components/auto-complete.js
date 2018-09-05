@@ -20,15 +20,14 @@ export default Ember.Component.extend({
   input:            null,
   inputValue:       '',
   focusedIndex:     null,
-  selectedIndex:    null,
   displayProperty:  'place_name',
   isBackspacing: false,
   searchTimeout: null,
   typingSearchDelay: 200,
 
   items: [],
-  selectedItem: Ember.computed('selectedIndex', 'items.[]', function() {
-    return this.get('items').objectAt(this.get('selectedIndex'));
+  selectedItem: Ember.computed('focusedIndex', 'items.[]', function() {
+    return this.get('items').objectAt(this.get('focusedIndex'));
   }),
 
   options: Ember.computed('items.[]', function() {
@@ -72,16 +71,8 @@ export default Ember.Component.extend({
     this.set('focusedIndex', index);
   },
 
-  setSelectedIndex(index) {
-    this.set('selectedIndex', index);
-  },
-
   resetFocusedIndex() {
     this.setFocusedIndex(null);
-  },
-
-  resetSelectedIndex() {
-    this.setSelectedIndex(null);
   },
 
   focusPrevious: function(event) {
@@ -120,13 +111,15 @@ export default Ember.Component.extend({
     const focusedIndex = this.get('focusedIndex');
     if (Ember.isPresent(focusedIndex)) {
       this.send('selectItem', focusedIndex);
+    } else {
+      debugger
+      this.get('on-select')(null);;
     }
     this.closeDropdown();
   },
 
   _inputValueForItem(item) {
-    let displayProperty = this.get('displayProperty');
-    return item.get(displayProperty);
+    return item.get(this.get('displayProperty'));
   },
 
   _buildMapBoxUrl(query) {
@@ -166,7 +159,7 @@ export default Ember.Component.extend({
       return Ember.Object.create({
         id: item.get('id'),
         index: index,
-        value: item.get(this.get('displayProperty'))
+        value: this._inputValueForItem(item)
       });
     });
     return Ember.A(options);
@@ -174,26 +167,31 @@ export default Ember.Component.extend({
 
   actions: {
     selectItem(index) {
-      this.setSelectedIndex(index);
-      let selectedItem = this.get('items')[index];
-      this.get('on-select')(selectedItem);
-      this.closeDropdown();
-      this.set('inputValue', this._inputValueForItem(selectedItem));
+      if(this.get('inputValue').length > this.get('minSearchLength')){
+        console.log('index', index)
+        this.setFocusedIndex(index);
+        let selectedItem = this.get('items')[index];
+        this.set('inputValue', this._inputValueForItem(selectedItem));
+        this.get('on-select')(selectedItem);
+        this.closeDropdown();
+      } else {
+        // selecting enter with no value
+        this.get('on-select')(null);
+      }
     },
 
     inputDidChange(value) {
       let _this = this
       this.set('inputValue', value);
+      console.log('changed to', value)
       if (this.get('isBackspacing')) {
         this.set('isBackspacing', false);
       } else if(value.length > this.get('minSearchLength')){
         clearTimeout(this.get('searchTimeout'));
         this.set('searchTimeout', setTimeout(function() {
+          _this.setFocusedIndex(0);
           _this.searchPlaces(value);
-          _this.resetFocusedIndex();
-          _this.resetSelectedIndex();
           _this.openDropdown();
-          _this.setSelectedIndex(0);
           }, _this.get('typingSearchDelay'))
         );
       }
