@@ -1,6 +1,6 @@
 {
   "name": "ember-mapbox-autocomplete",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A widely customizable autocomplete component, very much based on ic-autocomplete",
   "directories": {
     "doc": "doc",
