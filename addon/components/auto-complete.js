@@ -166,14 +166,13 @@ export default Ember.Component.extend({
 
   actions: {
     selectItem(index) {
-      if(this.get('inputValue').length > this.get('minSearchLength')){
-        console.log('index', index)
-        this.setFocusedIndex(index);
+      this.setFocusedIndex(index);
+      if(Ember.isPresent(this.get('inputValue'))) {
         let selectedItem = this.get('items')[index];
         this.set('inputValue', this._inputValueForItem(selectedItem));
         this.get('on-select')(selectedItem);
       } else {
-        // selecting enter with no value
+        // Clear out value when text field is blank
         this.get('on-select')(null);
       }
       this.closeDropdown();
@@ -182,7 +181,6 @@ export default Ember.Component.extend({
     inputDidChange(value) {
       let _this = this
       this.set('inputValue', value);
-      console.log('changed to', value)
       if (this.get('isBackspacing')) {
         this.set('isBackspacing', false);
       } else if(value.length > this.get('minSearchLength')){
