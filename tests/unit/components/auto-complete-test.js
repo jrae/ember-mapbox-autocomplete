@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import { moduleFor, test } from 'ember-qunit';
 
-moduleFor('component:auto-complete', 'Unit | Component | auto-complete', {
+moduleFor('component:mapbox-autocomplete', 'Unit | Component | mapbox-autocomplete', {
   unit: true
 });
 

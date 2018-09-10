@@ -2,94 +2,106 @@ import Ember from 'ember';
 import { moduleForComponent, test } from 'ember-qunit';
 import hbs from 'htmlbars-inline-precompile';
 
-const artists = Ember.A([
-  Ember.Object.create({ id: 1, name: "Eddie Vedder" }),
-  Ember.Object.create({ id: 2, name: "Dave Grohl" }),
-  Ember.Object.create({ id: 3, name: "John Paul Jones" }),
-  Ember.Object.create({ id: 4, name: "Jimmy Page" })
-]);
+const locations = Ember.A([
+  Ember.Object.create({
+    id: 'place.9962989141465270', index: 0,
+    place_name: "São Paulo, São Paulo, Brazil", text: 'São Paulo',
+    lat: -46.6334, long: -23.5507}),
+  Ember.Object.create({
+    id: 'place.9962989141465271', index: 0,
+    place_name: "Santiago Metropolitan, Chile", text: 'Santiago Metropolitan',
+    lat: -46.6334, long: -23.5507}),
+  Ember.Object.create({
+    id: 'place.9962989141465272', index: 0,
+    place_name: "Some other place", text: 'Some place',
+    lat: -46.6334, long: -23.5343547}),
+  Ember.Object.create({
+    id: 'place.9962989141465273', index: 0,
+    place_name: "Never never land", text: 'Neverland',
+    lat: -46.6334, long: -23.534307}),
+  Ember.Object.create({
+    id: 'place.9962989141465274', index: 0,
+    place_name: "San Juan, Philippines", text: 'San Juan',
+    lat: 121.146916, long: 14.599856}),
+  ]);
 
 function typeInInput(text) {
-  this.$('.auto-complete-input')
+  this.$('.mapbox-autocomplete-input')
     .prop('value', text)
     .trigger('input');
 }
 
-moduleForComponent('auto-complete', 'Integration | Component | auto-complete', {
+moduleForComponent('mapbox-autocomplete', 'Integration | Component | mapbox-autocomplete', {
   integration: true
 });
 
 test('it works', function(assert) {
-  assert.expect(4);
+  // assert.expect(5);
 
   // Set any properties with this.set('myProperty', 'value');
   // Handle any actions with this.on('myAction', function(val) { ... });
-  this.set('selectedArtist', null);
-  this.set('matchingArtists', artists);
+  this.set('items', locations);
+  this.set('options', locations);
   this.actions = {
-    selectArtist(artist) {
-      this.set('selectedArtist', artist);
-    },
-    filterArtists(searchTerm) {
-      const matchingArtists = artists.filter(function(artist) {
-        searchTerm = searchTerm.toLowerCase();
-        return artist.get('name').toLowerCase().indexOf(searchTerm) === 0;
-      });
-      this.set('matchingArtists', Ember.A(matchingArtists));
+    selectLocation(location) {
+      this.set('selectedLocation', location);
     }
   };
 
   this.render(hbs`
-    {{#auto-complete
-        on-select=(action "selectArtist")
-        on-input=(action "filterArtists")
-        items=matchingArtists
-        displayProperty="name"
-        as |params|}}
-        {{auto-complete-input
-            class="auto-complete-input"
+    {{#mapbox-autocomplete
+        on-select=(action "selectLocation")
+        mapboxAccessToken='mapboxAccessToken'
+        class="autocomplete-container" as |params|}}
+      <div class="input-group">
+        {{mapbox-autocomplete-input
             value=params.inputValue
             on-change=params.onInput
-            type="text"}}
-        {{#auto-complete-list isVisible=params.isOpen}}
+            type="text"
+            class="combobox input-large form-control"
+            placeholder="Enter an address..."}}
+        {{#mapbox-autocomplete-list
+            isVisible=params.isOpen
+            class="typeahead typeahead-long dropdown-menu"}}
           {{#each params.options as |option|}}
-            {{#auto-complete-option
-                class="auto-complete-option"
+            {{#mapbox-autocomplete-option
                 index=option.index
                 on-click=params.onSelect
-                isFocused=(eq params.focusedIndex option.index)
-                isSelected=(eq params.selectedIndex option.index)}}
+                isFocused=(is-equal params.focusedIndex option.index)
+                isSelected=(is-equal params.selectedIndex option.index)}}
               <a href="#">{{option.value}}</a>
-            {{/auto-complete-option}}
+            {{/mapbox-autocomplete-option}}
           {{else}}
             <li><a href="#">No results.</a></li>
           {{/each}}
-        {{/auto-complete-list}}
-        {{#auto-complete-dropdown-toggle on-click=params.toggleDropdown}}
+        {{/mapbox-autocomplete-list}}
+        {{#mapbox-autocomplete-dropdown-toggle on-click=params.toggleDropdown class="input-group-addon dropdown-toggle"}}
           <span class="caret"></span>
-        {{/auto-complete-dropdown-toggle}}
-    {{/auto-complete}}
+        {{/mapbox-autocomplete-dropdown-toggle}}
+      </div>
+    {{/mapbox-autocomplete}}
   `);
 
-  function assertSelectedArtist(name) {
-    assert.equal(this.get('selectedArtist.name'), name);
+  function assertSelectedLocation(name) {
+    assert.equal(this.get('selectedLocation.place_name'), name);
   }
 
   function assertOptionCount(count, message) {
-    assert.equal(this.$('.auto-complete-option').length, count, message);
+    assert.equal(this.$('.mapbox-autocomplete-option').length, count, message);
   }
 
-  this.$('.auto-complete-option:first').click();
-  assertSelectedArtist.call(this, 'Eddie Vedder');
+  typeInInput.call(this, 'San');
 
-  this.$('.auto-complete-option:last').click();
-  assertSelectedArtist.call(this, 'Jimmy Page');
 
-  typeInInput.call(this, 'J');
-  assertOptionCount.call(this, 2, "The filtered artists are shown");
+  this.$('ember-autocomplete-toggle').click();
+  assertOptionCount.call(this, 5, "The filtered locations are shown");
 
-  typeInInput.call(this, 'Jo');
-  assertSelectedArtist.call(this, 'John Paul Jones');
+  this.$('.mapbox-autocomplete-option:first').click();
+  assertSelectedLocation.call(this, 'São Paulo, São Paulo, Brazil');
+
+  this.$('ember-autocomplete-toggle').click();
+  this.$('.mapbox-autocomplete-option:last').click();
+  assertSelectedLocation.call(this, 'San Juan, Philippines');
 
   typeInInput.call(this, '');
 });

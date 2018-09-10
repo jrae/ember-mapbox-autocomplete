@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import layout from '../templates/components/auto-complete';
+import layout from '../templates/components/mapbox-autocomplete';
 
 export default Ember.Component.extend({
 
@@ -12,7 +12,7 @@ export default Ember.Component.extend({
 
   "on-select": null,
 
-  mapboxAccessToken: '',
+  mapboxAccessToken: EmberENV.MAPBOX.ACCESS_TOKEN,
   layout: layout,
   minSearchLength:  2,
   resultsLimit:     5,
@@ -26,13 +26,7 @@ export default Ember.Component.extend({
   typingSearchDelay: 200,
 
   items: [],
-  selectedItem: Ember.computed('focusedIndex', 'items.[]', function() {
-    return this.get('items').objectAt(this.get('focusedIndex'));
-  }),
-
-  options: Ember.computed('items.[]', function() {
-    return this.parseOptions(this.get('items'));
-  }),
+  options: [],
 
   keydownMap: {
     8:  'startBackspacing', // backspace
@@ -117,28 +111,28 @@ export default Ember.Component.extend({
     this.closeDropdown();
   },
 
-  _inputValueForItem(item) {
+  inputValueForItem(item) {
     return item.get(this.get('displayProperty'));
   },
 
-  _buildMapBoxUrl(query) {
+  buildMapBoxUrl(query) {
     return `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${this.get('mapboxAccessToken')}&limit=${this.get('resultsLimit')}`
   },
 
   searchPlaces(query) {
     let _this = this;
     Ember.$.ajax({
-      url: this._buildMapBoxUrl(query),
+      url: this.buildMapBoxUrl(query),
       type: 'GET',
       dataType: 'json'
     }).then(function(data) {
-      _this._parsePlaces(data.features);
+      _this.parsePlaces(data.features);
     }, function(error) {
         console.log('failed to search places via mapbox', error);
     });
   },
 
-  _parsePlaces(features) {
+  parsePlaces(features) {
     let items = features.map((item, index) => {
       return Ember.Object.create({
         id: item.id,
@@ -158,7 +152,7 @@ export default Ember.Component.extend({
       return Ember.Object.create({
         id: item.get('id'),
         index: index,
-        value: this._inputValueForItem(item)
+        value: this.inputValueForItem(item)
       });
     });
     return Ember.A(options);
@@ -169,7 +163,7 @@ export default Ember.Component.extend({
       this.setFocusedIndex(index);
       if(Ember.isPresent(this.get('inputValue'))) {
         let selectedItem = this.get('items')[index];
-        this.set('inputValue', this._inputValueForItem(selectedItem));
+        this.set('inputValue', this.inputValueForItem(selectedItem));
         this.get('on-select')(selectedItem);
       } else {
         // Clear out value when text field is blank
