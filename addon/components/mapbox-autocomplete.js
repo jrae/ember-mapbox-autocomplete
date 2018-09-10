@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import layout from '../templates/components/auto-complete';
+import layout from '../templates/components/mapbox-autocomplete';
 
 export default Ember.Component.extend({
 
