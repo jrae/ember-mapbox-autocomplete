@@ -12,7 +12,7 @@ export default Ember.Component.extend({
 
   "on-select": null,
 
-  mapboxAccessToken: '',
+  mapboxAccessToken: EmberENV.MAPBOX.ACCESS_TOKEN,
   layout: layout,
   minSearchLength:  2,
   resultsLimit:     5,
