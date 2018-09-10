@@ -26,13 +26,7 @@ export default Ember.Component.extend({
   typingSearchDelay: 200,
 
   items: [],
-  selectedItem: Ember.computed('focusedIndex', 'items.[]', function() {
-    return this.get('items').objectAt(this.get('focusedIndex'));
-  }),
-
-  options: Ember.computed('items.[]', function() {
-    return this.parseOptions(this.get('items'));
-  }),
+  options: [],
 
   keydownMap: {
     8:  'startBackspacing', // backspace
