@@ -106,7 +106,7 @@ export default Ember.Component.extend({
     if (Ember.isPresent(focusedIndex)) {
       this.send('selectItem', focusedIndex);
     } else {
-      this.get('on-select')(null);;
+      this.get('on-select')(null);
     }
     this.closeDropdown();
   },
@@ -116,7 +116,7 @@ export default Ember.Component.extend({
   },
 
   buildMapBoxUrl(query) {
-    return `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${this.get('mapboxAccessToken')}&limit=${this.get('resultsLimit')}`
+    return `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${this.get('mapboxAccessToken')}&limit=${this.get('resultsLimit')}`;
   },
 
   searchPlaces(query) {
@@ -173,7 +173,7 @@ export default Ember.Component.extend({
     },
 
     inputDidChange(value) {
-      let _this = this
+      let _this = this;
       this.set('inputValue', value);
       if (this.get('isBackspacing')) {
         this.set('isBackspacing', false);
