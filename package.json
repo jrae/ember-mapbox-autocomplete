@@ -1,7 +1,7 @@
 {
   "name": "ember-mapbox-autocomplete",
   "version": "0.0.5",
-  "description": "A widely customizable autocomplete component, very much based on ic-autocomplete",
+  "description": "An auto complete search tool using mapbox API to get geocoded address results",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -15,7 +15,7 @@
   "engines": {
     "node": ">= 0.10.0"
   },
-  "author": "Balint Erdi",
+  "author": "Balint Erdi, Jason Rae",
   "license": "MIT",
   "devDependencies": {
     "broccoli-asset-rev": "^2.2.0",
@@ -41,8 +41,9 @@
   },
   "keywords": [
     "ember-addon",
-    "autocomplete",
-    "auto-complete"
+    "mapbox",
+    "geocoder",
+    "mapbox-autocomplete"
   ],
   "dependencies": {
     "ember-cli-babel": "^6.17.0",
