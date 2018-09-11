@@ -21,8 +21,8 @@ export default Ember.Component.extend({
   inputValue:       '',
   focusedIndex:     null,
   displayProperty:  'place_name',
-  country_code:  null,
-  types: null,
+  country_code:  '',
+  types: '',
   isBackspacing: false,
   searchTimeout: null,
   typingSearchDelay: 200,
@@ -143,7 +143,7 @@ export default Ember.Component.extend({
         text: item.text,
         long: item.center[0],
         lat: item.center[1],
-        raw: item,
+        data: item,
       });
     });
     this.set('items', items);
