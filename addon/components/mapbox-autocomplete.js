@@ -21,6 +21,8 @@ export default Ember.Component.extend({
   inputValue:       '',
   focusedIndex:     null,
   displayProperty:  'place_name',
+  country_code:  null,
+  types: null,
   isBackspacing: false,
   searchTimeout: null,
   typingSearchDelay: 200,
@@ -116,7 +118,7 @@ export default Ember.Component.extend({
   },
 
   buildMapBoxUrl(query) {
-    return `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${this.get('mapboxAccessToken')}&limit=${this.get('resultsLimit')}`;
+    return `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${this.get('mapboxAccessToken')}&limit=${this.get('resultsLimit')}&country=${this.get('country_code')}&types=${this.get('types')}`;
   },
 
   searchPlaces(query) {
@@ -141,6 +143,7 @@ export default Ember.Component.extend({
         text: item.text,
         long: item.center[0],
         lat: item.center[1],
+        raw: item,
       });
     });
     this.set('items', items);
