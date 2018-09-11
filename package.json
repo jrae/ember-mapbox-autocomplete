@@ -1,6 +1,6 @@
 {
   "name": "ember-mapbox-autocomplete",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An auto complete search tool using mapbox API to get geocoded address results",
   "directories": {
     "doc": "doc",
